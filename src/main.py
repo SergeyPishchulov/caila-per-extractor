@@ -20,8 +20,10 @@ class PredictRequest(TextsCollection):
     @validator('texts')
     @classmethod
     def texts_are_not_too_long(cls, texts: List[str]) -> List[str]:
-        if sum([len(t) for t in texts]) > 1000:
-            raise ValueError("All texts should not be longer than 1000 characters")
+        for t in texts:
+            if len(t) > 1000:
+                raise ValueError(f"Text should not be longer than 1000 characters."
+                                 f"Long text: {t}")
         return texts
 
 
@@ -48,7 +50,7 @@ async def predict() -> PredictResponse:
     prompt_w_text = prompt % user_text  # data.texts[0] # TODO all texts
     res = await openai.chat.completions.create(
         messages=[{"role": "user", "content": "hello"}],
-        model="just-ai/openai-proxy/gpt-4o"
+        model="just-ai/openai-proxy/gpt-4o-mini"
     )
     content = res.choices[0].message.content
     print(f"<<<< {content}")
