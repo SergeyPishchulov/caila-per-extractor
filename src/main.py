@@ -40,22 +40,21 @@ openai = AsyncOpenAI(
 )
 
 
-class SimpleActionExample(Task):
-    def __init__(self, config: BaseModel, service_sdk: MlpServiceSDK = None) -> None:
-        super().__init__(config, service_sdk)
+# class SimpleActionExample(Task):
+#     def __init__(self, config: BaseModel, service_sdk: MlpServiceSDK = None) -> None:
+#         super().__init__(config, service_sdk)
 
-    async def predict(self, data: PredictRequest, config: BaseModel) -> PredictResponse:
-        prompt_w_text = prompt % user_text  # data.texts[0] # TODO all texts
-        res = await openai.chat.completions.create(
-            messages=[{"role": "user", "content": prompt_w_text}],
-            model="just-ai/openai-proxy/yandexgpt"
-        )
-        content = res.choices[0].message.content
-        print(f"<<<< {content}")
-        return PredictResponse(entities_list=[])
+async def predict() -> PredictResponse:
+    prompt_w_text = prompt % user_text  # data.texts[0] # TODO all texts
+    res = await openai.chat.completions.create(
+        messages=[{"role": "user", "content": "hello"}],
+        model="just-ai/openai-proxy/gpt-4o"
+    )
+    content = res.choices[0].message.content
+    print(f"<<<< {content}")
+    return PredictResponse(entities_list=[])
 
 
 if __name__ == "__main__":
-    asyncio.run()
+    asyncio.run(predict())
     # host_mlp_cloud(SimpleActionExample, BaseModel())
-
