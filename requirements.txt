@@ -1,1 +1,3 @@
 git+https://github.com/just-ai/mlp-python-sdk.git@dev
+python-dotenv
+pydantic

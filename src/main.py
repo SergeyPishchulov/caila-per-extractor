@@ -2,12 +2,17 @@ from typing import List
 
 from mlp_sdk.abstract import Task
 from mlp_sdk.hosting.host import host_mlp_cloud
+from mlp_sdk.transport.MlpClientSDK import MlpClientSDK
 from mlp_sdk.transport.MlpServiceSDK import MlpServiceSDK
+from mlp_sdk.types import Span, NamedEntities, TextsCollection
 from pydantic import BaseModel, field_validator
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-class PredictRequest(BaseModel):
-    texts: List[str]
+class PredictRequest(TextsCollection):
 
     @field_validator('texts')
     @classmethod
@@ -17,25 +22,11 @@ class PredictRequest(BaseModel):
         return texts
 
 
-class Span(BaseModel):
-    start_index: int
-    end_index: int
-
-
-class Entity(BaseModel):
-    value: str
-    entity_type: str
-    span: Span
-    entity: str
-    source_type: str = "LLM_PER_EXTRACTOR"
-
-
-class EntityContainer(BaseModel):
-    entities: List[Entity]
+SOURCE_TYPE = "LLM_PER_EXTRACTOR"
 
 
 class PredictResponse(BaseModel):
-    entities_list: List[EntityContainer]
+    entities_list: List[NamedEntities]
 
 
 class SimpleActionExample(Task):
@@ -43,6 +34,10 @@ class SimpleActionExample(Task):
         super().__init__(config, service_sdk)
 
     def predict(self, data: PredictRequest, config: BaseModel) -> PredictResponse:
+        sdk = MlpClientSDK()
+        sdk.predict(account=os.getenv('CAILA_ACCOUNT'),
+                    model="yandexgpt",
+                    data="")
         return PredictResponse(response="Hello, " + data.name + "!")
 
 
