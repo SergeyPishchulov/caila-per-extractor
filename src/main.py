@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
+from src.ner import NerLlm
 from src.prompt import prompt, user_text
 
 load_dotenv()
@@ -42,22 +43,17 @@ openai = AsyncOpenAI(
 class NERLLM(Task):
     def __init__(self, config: BaseModel = None, service_sdk: MlpServiceSDK = None) -> None:
         super().__init__(config, service_sdk)
+        self.nerllm = NerLlm()
 
     def init_config_schema(self) -> Type[BaseModel]:
         return BaseModel
 
     def predict(self, data: TextsCollection, config: BaseModel) -> NamedEntitiesCollection:
-        result = TextsCollection(texts=[])
-        result.texts.append("Done")
-        return NamedEntitiesCollection(
-            entities_list=[
-                NamedEntities(entities=[NamedEntity(
-                    entity_type="t",
-                    value="1",
-                    span=Span(start_index=1, end_index=2),
-                    entity="e",
-                    source_type="1"
-                )])])
+        texts_results = []
+        for text in data.texts:
+            texts_results.append(self.nerllm.get_ner_person(text))
+
+        return NamedEntitiesCollection(entities_list=texts_results)
 
     async def predict_my(self, data: TextsCollection, config: BaseModel) -> TextsCollection:  # NamedEntitiesCollection:
         prompt_w_text = prompt % user_text  # data.texts[0] # TODO all texts
