@@ -5,7 +5,8 @@ from mlp_sdk.abstract import Task
 from mlp_sdk.hosting.host import host_mlp_cloud, host
 from mlp_sdk.transport.MlpClientSDK import MlpClientSDK
 from mlp_sdk.transport.MlpServiceSDK import MlpServiceSDK
-from mlp_sdk.types import Span, NamedEntities, TextsCollection, NamedEntitiesCollection
+from mlp_sdk.types import Span, NamedEntities, TextsCollection, NamedEntitiesCollection, NamedEntity, \
+    InflectorTextsCollection
 from pydantic import BaseModel, validator
 import os
 from dotenv import load_dotenv
@@ -45,15 +46,36 @@ class NERLLM(Task):
     def init_config_schema(self) -> Type[BaseModel]:
         return BaseModel
 
-    async def predict(self, data: TextsCollection, config: BaseModel) -> NamedEntitiesCollection:
+    def predict(self, data: TextsCollection, config: BaseModel) -> NamedEntitiesCollection:
+        result = TextsCollection(texts=[])
+        result.texts.append("Done")
+        return NamedEntitiesCollection(
+            entities_list=[
+                NamedEntities(entities=[NamedEntity(
+                    entity_type="t",
+                    value="1",
+                    span=Span(start_index=1, end_index=2),
+                    entity="e",
+                    source_type="1"
+                )])])
+
+    async def predict_my(self, data: TextsCollection, config: BaseModel) -> TextsCollection:  # NamedEntitiesCollection:
         prompt_w_text = prompt % user_text  # data.texts[0] # TODO all texts
-        res = await openai.chat.completions.create(
-            messages=[{"role": "user", "content": "hello"}],
-            model="just-ai/openai-proxy/gpt-4o-mini"
-        )
-        content = res.choices[0].message.content
-        print(f"<<<< {content}")
-        return NamedEntitiesCollection(entities_list=[])
+        # res = await openai.chat.completions.create(
+        #     messages=[{"role": "user", "content": "hello"}],
+        #     model="just-ai/openai-proxy/gpt-4o-mini"
+        # )
+        # content = res.choices[0].message.content
+        # print(f"<<<< {content}")
+        return TextsCollection(texts=["DONE"])
+        # return NamedEntitiesCollection(
+        #     entities_list=[
+        #         NamedEntities(entities=[NamedEntity(
+        #             entity_type="t",
+        #             span=Span(start_index=1, end_index=2),
+        #             entity="e",
+        #             source_type="1"
+        #         )])])
 
     @property
     def predict_config_schema(self) -> Type[BaseModel]:
@@ -61,5 +83,5 @@ class NERLLM(Task):
 
 
 if __name__ == "__main__":
-    host(NERLLM, params=None, port=8082)
+    host(NERLLM, params=BaseModel(), port=8082)
     # host_mlp_cloud(NERLLM, BaseModel())
