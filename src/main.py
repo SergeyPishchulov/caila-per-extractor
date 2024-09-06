@@ -27,19 +27,6 @@ load_dotenv()
 #                                  f"Long text: {t}")
 #         return texts
 
-
-
-
-request_frame = '{"messages":[{"role":"user", "content":"%s"}]}'
-
-api_key = os.getenv("MLP_CLIENT_TOKEN")
-assert api_key is not None
-openai = AsyncOpenAI(
-    api_key=api_key,  # TODO maybe smth else
-    base_url="https://caila.io/api/adapters/openai"
-)
-
-
 class NERLLM(Task):
     def __init__(self, config: BaseModel = None, service_sdk: MlpServiceSDK = None) -> None:
         super().__init__(config, service_sdk)

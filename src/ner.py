@@ -2,6 +2,7 @@ import os
 import re
 from typing import List
 
+from dotenv import load_dotenv
 from mlp_sdk.types import NamedEntities, NamedEntity, Span
 from openai import AsyncOpenAI
 
@@ -9,12 +10,14 @@ from src import key
 from src.aprox_matcher import AproxMatcher
 from src.prompt import prompt
 
+load_dotenv()
+
 
 class NerLlm:
     SOURCE_TYPE = "LLM_PER_EXTRACTOR"
 
     def __init__(self):
-        api_key = key.MLP_CLIENT_TOKEN  # os.getenv("MLP_CLIENT_TOKEN")
+        api_key = os.getenv("MLP_CLIENT_TOKEN")
         assert api_key is not None
         self.openai_client = AsyncOpenAI(
             api_key=api_key,
