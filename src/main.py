@@ -28,7 +28,7 @@ load_dotenv()
 #         return texts
 
 
-SOURCE_TYPE = "LLM_PER_EXTRACTOR"  # TODO pass it
+
 
 request_frame = '{"messages":[{"role":"user", "content":"%s"}]}'
 
