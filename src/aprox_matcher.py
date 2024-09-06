@@ -1,5 +1,6 @@
 import re
 
+
 class AproxMatcher:
     @staticmethod
     def levenshtein_distance(s, t):
@@ -25,7 +26,7 @@ class AproxMatcher:
 
         return d[m][n]
 
-    def find(self, string:str, text):
+    def find(self, string: str, text: str):
         string = ' '.join(string.rstrip('.').split())
         text = ' '.join(text.rstrip('.').split())
 
@@ -37,7 +38,8 @@ class AproxMatcher:
         for word_len in text_word_lens:
             dist = self.levenshtein_distance(string, text[shift:shift + len(string)])
             if dist / len(string) < 0.25:
-                extracted_name = ' '.join(text[shift:].split()[:words_cnt_in_string])
+                words = [w.rstrip('.') if len(w) > 2 else w for w in text[shift:].split()]
+                extracted_name = ' '.join(words[:words_cnt_in_string])
                 starts_ends = [(m.start(), m.end()) for m in re.finditer(extracted_name, text)]
                 res.extend(starts_ends)
             shift += word_len + 1

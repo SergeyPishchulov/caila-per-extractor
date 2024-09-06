@@ -6,6 +6,7 @@ from mlp_sdk.types import NamedEntities, NamedEntity, Span
 from openai import AsyncOpenAI
 
 from src import key
+from src.aprox_matcher import AproxMatcher
 from src.prompt import prompt
 
 
@@ -13,7 +14,7 @@ class NerLlm:
     SOURCE_TYPE = "LLM_PER_EXTRACTOR"
 
     def __init__(self):
-        api_key = key.MLP_CLIENT_TOKEN #os.getenv("MLP_CLIENT_TOKEN")
+        api_key = key.MLP_CLIENT_TOKEN  # os.getenv("MLP_CLIENT_TOKEN")
         assert api_key is not None
         self.openai_client = AsyncOpenAI(
             api_key=api_key,
@@ -29,15 +30,17 @@ class NerLlm:
 
     def parse_llm_raw_result(self, llm_raw_results, text):
         named_entities: List[NamedEntity] = []
-        for name in llm_raw_results.split(','):
+        for name in llm_raw_results.split(','):  # в начальной форме
             name = name.strip()
-            starts_ends = [(m.start(), m.end()) for m in re.finditer(name, text)]
+            starts_ends = AproxMatcher().find(name, text)
+            # starts_ends = [(m.start(), m.end()) for m in re.finditer(name, text)]
             for start, end in starts_ends:
+                name_int_text = text[start:end]
                 named_entities.append(NamedEntity(
                     entity_type="PERSON",
-                    value=name,
+                    value=name_int_text,
                     span=Span(start_index=start, end_index=end),
-                    entity=name,
+                    entity=name_int_text,
                     source_type=self.SOURCE_TYPE))
 
         return NamedEntities(entities=named_entities)
@@ -48,7 +51,6 @@ class NerLlm:
             model="just-ai/openai-proxy/gpt-4o-mini"
         )
         return response.choices[0].message.content
-
 
     def get_prompt(self, user_text):
         return prompt % user_text
