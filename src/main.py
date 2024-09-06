@@ -17,6 +17,7 @@ from src.prompt import prompt, user_text
 
 load_dotenv()
 
+
 # class PredictRequest(TextsCollection):
 #     @validator('texts')
 #     @classmethod
@@ -35,30 +36,27 @@ class NERLLM(Task):
     def init_config_schema(self) -> Type[BaseModel]:
         return BaseModel
 
-    def predict(self, data: TextsCollection, config: BaseModel) -> NamedEntitiesCollection:
+    async def predict(self, data: TextsCollection, config: BaseModel) -> NamedEntitiesCollection:
         texts_results = []
         for text in data.texts:
-            texts_results.append(self.nerllm.get_ner_person(text))
+            found_in_text = await self.nerllm.get_ner_person(text)
+            assert isinstance(found_in_text, NamedEntities), type(found_in_text)
+            texts_results.append(found_in_text)
 
         return NamedEntitiesCollection(entities_list=texts_results)
 
-    async def predict_my(self, data: TextsCollection, config: BaseModel) -> TextsCollection:  # NamedEntitiesCollection:
-        prompt_w_text = prompt % user_text  # data.texts[0] # TODO all texts
-        # res = await openai.chat.completions.create(
-        #     messages=[{"role": "user", "content": "hello"}],
-        #     model="just-ai/openai-proxy/gpt-4o-mini"
-        # )
-        # content = res.choices[0].message.content
-        # print(f"<<<< {content}")
-        return TextsCollection(texts=["DONE"])
-        # return NamedEntitiesCollection(
-        #     entities_list=[
-        #         NamedEntities(entities=[NamedEntity(
-        #             entity_type="t",
-        #             span=Span(start_index=1, end_index=2),
-        #             entity="e",
-        #             source_type="1"
-        #         )])])
+    async def orig_predict(self, data: TextsCollection, config: BaseModel) -> NamedEntitiesCollection:
+        result = TextsCollection(texts=[])
+        result.texts.append("Done")
+        return NamedEntitiesCollection(
+            entities_list=[
+                NamedEntities(entities=[NamedEntity(
+                    entity_type="t",
+                    value="1",
+                    span=Span(start_index=1, end_index=2),
+                    entity="e",
+                    source_type="1"
+                )])])
 
     @property
     def predict_config_schema(self) -> Type[BaseModel]:

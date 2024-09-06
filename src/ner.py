@@ -28,7 +28,8 @@ class NerLlm:
         if not isinstance(text, str):
             raise TypeError(f"text of wrong type: {type(text)}")
 
-        llm_raw_results = await self.get_llm_raw_result(text)
+        # llm_raw_results = await self.get_llm_raw_result(text)
+        llm_raw_results = "Иван Алексеевич Бунин, Вера Николаевна Муромцева."
         return self.parse_llm_raw_result(llm_raw_results, text)
 
     def parse_llm_raw_result(self, llm_raw_results, text):
@@ -38,14 +39,14 @@ class NerLlm:
             starts_ends = AproxMatcher().find(name, text)
             # starts_ends = [(m.start(), m.end()) for m in re.finditer(name, text)]
             for start, end in starts_ends:
-                name_int_text = text[start:end]
+                name_in_text = text[start:end]
+                assert isinstance(name_in_text, str)
                 named_entities.append(NamedEntity(
                     entity_type="PERSON",
-                    value=name_int_text,
+                    value=name_in_text,
                     span=Span(start_index=start, end_index=end),
-                    entity=name_int_text,
+                    entity=name_in_text,
                     source_type=self.SOURCE_TYPE))
-
         return NamedEntities(entities=named_entities)
 
     async def get_llm_raw_result(self, text):
